@@ -61,6 +61,12 @@ class mod(commands.Cog):
                 embed.set_footer(text = f"User-ID: {user.id}" , icon_url = f"{ctx.author.avatar.url}")
                 embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.avatar.url}")
                 return await ctx.reply(embed=embed, mention_author = True)
+            elif member.top_role > self.zeus.top_role:
+                embed = discord.Embed(timestamp = ctx.message.created_at , title = "Fehler aufgetreten" ,
+                                      description = "Du kannst niemanden bannen, der höher ist als ich!")
+                embed.set_footer(text = f"User-ID: {user.id}" , icon_url = f"{ctx.author.avatar.url}")
+                embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.avatar.url}")
+                return await ctx.reply(embed = embed , mention_author = True)
             else:
                 await ctx.guild.ban(user , reason = f"{reason}.")
                 embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 ,
