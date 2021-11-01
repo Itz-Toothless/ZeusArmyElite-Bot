@@ -87,11 +87,6 @@ class message_logs(commands.Cog):
         channel = await self.zeus.fetch_channel(904464360263548999)
         return await channel.send(embed=embed)
 
-    @commands.Cog.listeners()
-    async def on_guild_remove(self, guild):
-        created = guild.created_at
-        embed = discord.Embed(color = discord.Colour.random(),
-                              title = f"Ich bin aus ")
 
 def setup(zeus):
     zeus.add_cog(message_logs(zeus))
