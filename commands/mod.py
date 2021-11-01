@@ -42,7 +42,7 @@ class mod(commands.Cog):
         else:
             raise error
 
-    @commands.command(name = "ban" , description = "Verbannt ein Server-Mitglied" ,
+    @commands.command(name = "ban" , description = "Verbannt einen Nutzer vom Server" ,
                       usage = "zae!ban <User-ID/@ping> [Grund]")
     @commands.guild_only()
     @commands.has_permissions(ban_members = True)
