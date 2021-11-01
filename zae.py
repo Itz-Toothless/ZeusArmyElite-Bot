@@ -3,6 +3,7 @@ import locale
 import sys
 import time
 import traceback
+import os
 
 import discord
 from discord.ext import commands
@@ -121,4 +122,4 @@ async def botinformation(ctx):
     return await ctx.reply(embed = embed , mention_author = False)
 
 
-zeus.run("OTAxNTg1MTU5ODQ4MDk1NzY1.YXSAnA.YssnLwNeARCiNTz3lNpq1G9gRkU" , reconnect = True)
+zeus.run(os.getenv("token") , reconnect = True)
