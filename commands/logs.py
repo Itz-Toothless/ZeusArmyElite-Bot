@@ -87,6 +87,5 @@ class message_logs(commands.Cog):
         channel = await self.zeus.fetch_channel(904464360263548999)
         return await channel.send(embed=embed)
 
-
 def setup(zeus):
     zeus.add_cog(message_logs(zeus))
