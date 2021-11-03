@@ -1,4 +1,5 @@
 import datetime
+import asyncio
 from datetime import datetime
 from typing import Union
 import discord
@@ -10,6 +11,7 @@ class infos(commands.Cog):
         self.zeus = zeus
 
     @commands.command(aliases = ["serveri" , "server-info" , "si" , "server info"])
+    @commands.guild_only()
     async def serverinfo(self , ctx):
         server_name = str(ctx.guild.name)
         server_owner = str(ctx.guild.owner)
@@ -46,6 +48,7 @@ class infos(commands.Cog):
         return await ctx.reply(embed = embed)
 
     @commands.command(aliases = ["user" , "user-info" , "user_info" , "uinfo" , "u-info" , "info", "minfo", "memberinfo", "member-info", "member_info"])
+    @commands.guild_only()
     async def userinfo(self , ctx , * , user: Union[discord.Member, discord.User] = None):
         if user is None:
             voice_state = "Keine Sprach-Kanal Aktivität erkannt" if not ctx.author.voice else ctx.author.voice.channel
@@ -58,7 +61,10 @@ class infos(commands.Cog):
             discord_timestamp = "**<t:{}:{}>**".format(int(d1.timestamp()) , "F")
             roles = "Keine Rollen erkannt" if not ctx.author.roles[:0:-1] else ', '.join(
                 r.mention for r in ctx.author.roles[:0:-1])
-            url = ctx.author.avatar.url
+            try:
+                url = ctx.author.avatar.url
+            except AttributeError:
+                url = self.zeus.user.avatar.url
             embed = discord.Embed(timestamp = timestamp , color = embed_color ,
                                   title = f"Informationen über " + str(ctx.author))
             embed.set_author(name = str(ctx.author) , icon_url = url)
@@ -71,9 +77,9 @@ class infos(commands.Cog):
             embed.add_field(name = 'Präsenz' , value = presence , inline = True)
             embed.add_field(name = 'Sprachkanal Aktivität' , value = voice_state , inline = True)
             if ctx.author.guild_permissions.administrator:
-                embed.add_field(name = "Admin?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
+                embed.add_field(name = "Admin?" , value = "<:Ja_Yes:896789260248686695>" , inline = False)
             else:
-                embed.add_field(name = "Admin?" , value = "<:No:896789214581117020>" , inline = True)
+                embed.add_field(name = "Admin?" , value = "<:No:896789214581117020>" , inline = False)
             if ctx.author.bot:
                 embed.add_field(name = "Bot?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
             else:
@@ -95,7 +101,10 @@ class infos(commands.Cog):
             embed_color = 0xff2200
             discord_timestamp = "**<t:{}:{}>**".format(int(d1.timestamp()) , "F")
             roles = "Keine Rollen erkannt" if not user.roles[:0:-1] else ', '.join([r.mention for r in user.roles[:0:-1]])
-            url = user.avatar.url
+            try:
+                url = user.avatar.url
+            except AttributeError:
+                url = self.zeus.user.avatar.url
             embed = discord.Embed(timestamp = timestamp , color = embed_color ,
                                   title = f"Informationen über " + str(user) ,
                                   description = f"{user.mention}")
@@ -109,9 +118,9 @@ class infos(commands.Cog):
             embed.add_field(name = 'Präsenz' , value = presence , inline = True)
             embed.add_field(name = 'Sprachkanal Aktivität' , value = voice_state , inline = True)
             if user.guild_permissions.administrator:
-                embed.add_field(name = "Admin?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
+                embed.add_field(name = "Admin?" , value = "<:Ja_Yes:896789260248686695>" , inline = False)
             else:
-                embed.add_field(name = "Admin?" , value = "<:No:896789214581117020>" , inline = True)
+                embed.add_field(name = "Admin?" , value = "<:No:896789214581117020>" , inline = False)
             if user.bot:
                 embed.add_field(name = "Bot?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
             else:
@@ -124,19 +133,23 @@ class infos(commands.Cog):
             return await ctx.send(embed = embed)
         elif isinstance(user, discord.User):  # if a user has been specified which isn't in the guild
             d1 = user.created_at
+            try:
+                url = user.avatar.url
+            except AttributeError:
+                url = self.zeus.user.avatar.url
             embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 ,
                                   title = f"Informationen über {user}",
                                   description = f"{user.mention}")
-            embed.set_author(name = f"{user}" , icon_url = user.avatar.url)
-            embed.set_thumbnail(url = user.avatar.url)
+            embed.set_author(name = f"{user}" , icon_url = url)
+            embed.set_thumbnail(url = url)
             embed.add_field(name = ":credit_card: Discord beigetreten am:" ,
                             value = "**<t:{}:{}>**".format(int(d1.timestamp()) , "F") , inline = False)
             if user.bot:
-                embed.add_field(name = "Bot?" , value = "<:Ja_Yes:896789260248686695>" , inline = False)
+                embed.add_field(name = "Bot?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
             else:
-                embed.add_field(name = "Bot?" , value = "<:No:896789214581117020>" , inline = False)
+                embed.add_field(name = "Bot?" , value = "<:No:896789214581117020>" , inline = True)
             embed.add_field(name = "💳 ID: " , value = f"**{user.id}**" , inline = False)
-            embed.set_footer(text = f"User-ID: {ctx.author.id}")
+            embed.set_footer(text = f"Autor-ID: {ctx.author.id}")
             return await ctx.send(embed = embed)
         else:
             voice_state = "Keine Sprach-Kanal Aktivität erkannt" if not ctx.author.voice else ctx.author.voice.channel
@@ -148,7 +161,10 @@ class infos(commands.Cog):
             embed_color = 0xff2200
             discord_timestamp = "**<t:{}:{}>**".format(int(d1.timestamp()) , "F")
             roles = "Keine Rollen erkannt" if not ctx.author.roles[:0:-1] else ', '.join(r.mention for r in ctx.author.roles[:0:-1])
-            url = ctx.author.avatar.url
+            try:
+                url = ctx.author.avatar.url
+            except AttributeError:
+                url = self.zeus.avatar.url
             embed = discord.Embed(timestamp = timestamp , color = embed_color ,
                                   title = f"Informationen über " + str(ctx.author))
             embed.set_author(name = str(ctx.author) , icon_url = url)
@@ -161,9 +177,9 @@ class infos(commands.Cog):
             embed.add_field(name = 'Präsenz' , value = presence , inline = True)
             embed.add_field(name = 'Sprachkanal Aktivität' , value = voice_state , inline = True)
             if ctx.author.guild_permissions.administrator:
-                embed.add_field(name = "Admin?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
+                embed.add_field(name = "Admin?" , value = "<:Ja_Yes:896789260248686695>" , inline = False)
             else:
-                embed.add_field(name = "Admin?" , value = "<:No:896789214581117020>" , inline = True)
+                embed.add_field(name = "Admin?" , value = "<:No:896789214581117020>" , inline = False)
             if ctx.author.bot:
                 embed.add_field(name = "Bot?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
             else:
@@ -177,45 +193,7 @@ class infos(commands.Cog):
 
     @userinfo.error  # If the member couldn't be found
     async def info_error(self , ctx , error):
-        if isinstance(error , commands.MemberNotFound):
-            voice_state = "Keine Sprach-Kanal Aktivität erkannt" if not ctx.author.voice else ctx.author.voice.channel
-            d1 = ctx.author.created_at
-            d2 = ctx.author.joined_at
-            presence = str(ctx.author.status).capitalize()
-            timestamp = ctx.message.created_at
-            server_timestamp = "**<t:{}:{}>**".format(int(d2.timestamp()) , "F")
-            embed_color = 0xff2200
-            discord_timestamp = "**<t:{}:{}>**".format(int(d1.timestamp()) , "F")
-            roles = "Keine Rollen erkannt" if not ctx.author.roles[:0:-1] else ', '.join(
-                r.mention for r in ctx.author.roles[:0:-1])
-            url = ctx.author.avatar.url
-            embed = discord.Embed(timestamp = timestamp , color = embed_color ,
-                                  title = f"Informationen über " + str(ctx.author))
-            embed.set_author(name = str(ctx.author) , icon_url = url)
-            embed.set_thumbnail(url = url)
-            embed.add_field(name = ":credit_card: Discord beigetreten am:" ,
-                            value = discord_timestamp , inline = True)
-            embed.add_field(name = ":credit_card: Server beigetreten am:" ,
-                            value = server_timestamp , inline = True)
-            embed.add_field(name = 'Nick' , value = ctx.author.nick , inline = True)
-            embed.add_field(name = 'Präsenz' , value = presence , inline = True)
-            embed.add_field(name = 'Sprachkanal Aktivität' , value = voice_state , inline = True)
-            if ctx.author.guild_permissions.administrator:
-                embed.add_field(name = "Admin?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
-            else:
-                embed.add_field(name = "Admin?" , value = "<:No:896789214581117020>" , inline = True)
-            if ctx.author.bot:
-                embed.add_field(name = "Bot?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
-            else:
-                embed.add_field(name = "Bot?" , value = "<:No:896789214581117020>" , inline = True)
-            embed.add_field(name = "Rollen: [{}]".format(len(ctx.author.roles) - 1) , value = roles , inline = False)
-            perm_string = ', '.join(
-                [str(p[0]).replace("_" , " ").title() for p in ctx.author.guild_permissions if p[1]])
-            embed.add_field(name = "<:Cmd:896789400250363934> Server Berechtigungen:" , value = perm_string ,
-                            inline = False)
-            embed.set_footer(text = '💳 ID: ' + str(ctx.author.id))
-            return await ctx.send(embed = embed)
-        elif isinstance(error , commands.UserNotFound):
+        if isinstance(error , commands.UserNotFound):
             voice_state = "Keine Sprach-Kanal Aktivität erkannt" if not ctx.author.voice else ctx.author.voice.channel
             d1 = ctx.author.created_at
             d2 = ctx.author.joined_at
@@ -257,6 +235,7 @@ class infos(commands.Cog):
             raise error
 
     @commands.command(aliases=["perm_string", "perms", "permissions"])
+    @commands.guild_only()
     async def allperms(self, ctx):
         embed = discord.Embed(timestamp = ctx.message.created_at, color = 0xff2200,
                               title = "Alle Berechtigungen",
@@ -266,6 +245,7 @@ class infos(commands.Cog):
         return await ctx.reply(embed=embed, mention_author = False)
 
     @commands.command(aliases=["role-info", "rinfo", "role-whois", "r-whois"])
+    @commands.guild_only()
     async def roleinfo(self, ctx, role: discord.Role = None):
         role_color = role.color
         role_date = role.created_at
@@ -295,6 +275,145 @@ class infos(commands.Cog):
             return await ctx.reply("Bitte erwähne eine Rolle oder benutze eine Rollen-ID, um Infos über diese zu erhalten!")
         elif isinstance(error, commands.RoleNotFound):
             return await ctx.reply("Diese Rolle existiert auf diesem Server nicht!")
+
+    @commands.command(aliases=["channel", "channel-info", "c-info", "ci", "c_info", "c info", "channel info", "channel_info"])
+    async def channelinfo(self, ctx, channel: Union[discord.TextChannel, discord.StageChannel, discord.VoiceChannel, discord.StoreChannel, discord.CategoryChannel] = None):
+        if isinstance(channel, discord.TextChannel):
+            channel_creationdate = channel.created_at
+            channel_name = channel.name
+            channel_id = channel.id
+            channel_mention = channel.mention
+            channel_overwrites = "Keine Rollen erkannt" if not channel.overwrites else ', '.join(
+                r.name for r in channel.overwrites)
+            channel_overwrite_count = len(channel.overwrites)
+            channel_category = channel.category
+            channel_nsfw = "<:Yes:902117760195252266>" if channel.nsfw else "<:No:896789214581117020>"
+            channel_sync = "<:Yes:902117760195252266>" if channel.permissions_synced else "<:No:896789214581117020>"
+            embed = discord.Embed(timestamp = ctx.message.created_at, color = discord.Colour.random(),
+                                  title = "Channel-Info")
+            embed.add_field(name="ID", value=channel_id, inline=True)
+            embed.add_field(name="Name", value = channel_name, inline = True)
+            embed.add_field(name="Erwähnung", value = f"`{channel_mention}`", inline = True)
+            embed.add_field(name = "Kategorie", value = channel_category, inline = True)
+            embed.add_field(name="NSFW?", value = channel_nsfw, inline = True)
+            embed.add_field(name="Berechtigungen Syncronisiert?", value = channel_sync, inline = True)
+            embed.add_field(name="Erstellung", value = "**<t:{}:{}>**".format(int(channel_creationdate.timestamp()), "F"), inline = True)
+            embed.add_field(name="Rollen [{}]".format(channel_overwrite_count), value = channel_overwrites, inline = True)
+            embed.set_author(name = ctx.author, icon_url = ctx.author.avatar.url)
+            return await ctx.send(embed=embed)
+        elif isinstance(channel, discord.VoiceChannel):
+            channel_creationdate = channel.created_at
+            channel_name = channel.name
+            channel_id = channel.id
+            channel_mention = channel.mention
+            channel_category = channel.category
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random() ,
+                                  title = "Channel-Info")
+            embed.add_field(name = "ID" , value = channel_id , inline = True)
+            embed.add_field(name = "Name" , value = channel_name , inline = True)
+            embed.add_field(name = "Erwähnung" , value = f"`{channel_mention}`" , inline = True)
+            embed.add_field(name = "Kategorie" , value = channel_category , inline = True)
+            embed.add_field(name = "Erstellung" ,
+                            value = "**<t:{}:{}>**".format(int(channel_creationdate.timestamp()) , "F") , inline = True)
+            embed.set_author(name = ctx.author , icon_url = ctx.author.avatar.url)
+            return await ctx.send(embed = embed)
+        elif isinstance(channel, discord.StageChannel):
+            channel_creationdate = channel.created_at
+            channel_name = channel.name
+            channel_id = channel.id
+            channel_mention = channel.mention
+            channel_overwrites = "Keine Rollen erkannt" if not channel.overwrites else ', '.join(
+                r.name for r in channel.overwrites)
+            channel_overwrite_count = len(channel.overwrites)
+            channel_category = channel.category
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random() ,
+                                  title = "Channel-Info")
+            embed.add_field(name = "ID" , value = channel_id , inline = True)
+            embed.add_field(name = "Name" , value = channel_name , inline = True)
+            embed.add_field(name = "Erwähnung" , value = f"`{channel_mention}`" , inline = True)
+            embed.add_field(name = "Kategorie" , value = channel_category , inline = True)
+            embed.add_field(name = "Erstellung" ,
+                            value = "**<t:{}:{}>**".format(int(channel_creationdate.timestamp()) , "F") , inline = True)
+            embed.add_field(name = "Rollen [{}]".format(channel_overwrite_count) , value = channel_overwrites ,
+                            inline = False)
+            embed.set_author(name = ctx.author , icon_url = ctx.author.avatar.url)
+            return await ctx.send(embed = embed)
+        elif isinstance(channel, discord.StoreChannel):
+            channel_creationdate = channel.created_at
+            channel_name = channel.name
+            channel_id = channel.id
+            channel_mention = channel.mention
+            channel_overwrites = "Keine Rollen erkannt" if not channel.overwrites else ', '.join(
+                r.name for r in channel.overwrites)
+            channel_overwrite_count = len(channel.overwrites)
+            channel_category = channel.category
+            channel_nsfw = "<:Yes:902117760195252266>" if channel.nsfw else "<:No:896789214581117020>"
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random() ,
+                                  title = "Channel-Info")
+            embed.add_field(name = "ID" , value = channel_id , inline = True)
+            embed.add_field(name = "Name" , value = channel_name , inline = True)
+            embed.add_field(name = "Erwähnung" , value = f"`{channel_mention}`" , inline = True)
+            embed.add_field(name = "Kategorie" , value = channel_category , inline = True)
+            embed.add_field(name = "NSFW?" , value = channel_nsfw , inline = True)
+            embed.add_field(name = "Erstellung" ,
+                            value = "**<t:{}:{}>**".format(int(channel_creationdate.timestamp()) , "F") , inline = True)
+            embed.add_field(name = "Rollen [{}]".format(channel_overwrite_count) , value = channel_overwrites ,
+                            inline = False)
+            embed.set_author(name = ctx.author , icon_url = ctx.author.avatar.url)
+            return await ctx.send(embed = embed)
+        elif isinstance(channel, discord.CategoryChannel):
+            channel_creationdate = channel.created_at
+            channel_id = channel.id
+            channel_mention = channel.mention
+            channel_overwrites = "Keine Rollen erkannt" if not channel.overwrites else ', '.join(
+                r.name for r in channel.overwrites)
+            channel_overwrite_count = len(channel.overwrites)
+            channel_category = channel.name
+            channel_sync = "<:Yes:902117760195252266>" if channel.permissions_synced else "<:No:896789214581117020>"
+            channel_nsfw = "<:Yes:902117760195252266>" if channel.nsfw else "<:No:896789214581117020>"
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random() ,
+                                  title = "Channel-Info")
+            embed.add_field(name = "ID" , value = channel_id , inline = True)
+            embed.add_field(name = "Name" , value = channel_category , inline = True)
+            embed.add_field(name = "Erwähnung" , value = f"`{channel_mention}`" , inline = True)
+            embed.add_field(name = "NSFW?" , value = channel_nsfw , inline = True)
+            embed.add_field(name = "Berechtigungen Syncronisiert?" , value = channel_sync , inline = True)
+            embed.add_field(name = "Erstellung" ,
+                            value = "**<t:{}:{}>**".format(int(channel_creationdate.timestamp()) , "F") , inline = True)
+            embed.add_field(name = "Rollen [{}]".format(channel_overwrite_count) , value = channel_overwrites ,
+                            inline = True)
+            embed.set_author(name = ctx.author , icon_url = ctx.author.avatar.url)
+            return await ctx.send(embed=embed)
+        else:
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random(),
+                                  title = "Fehler aufgetreten!" ,
+                                  description = "Erwähne einen Kanal mit der ID oder einem Ping!\n\n**`zae!channelinfo (#channel / id)`**")
+            embed.set_author(name = ctx.author , icon_url = ctx.author.avatar.url)
+            embed.set_footer(text = "User-ID: {}".format(ctx.author.id) , icon_url = ctx.author.avatar.url)
+            return await ctx.send(embed = embed)
+
+    @channelinfo.error
+    async def channel_not_found(self, ctx, error):
+        if isinstance(error , commands.ChannelNotFound):
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random() ,
+                                  title = "Fehler aufgetreten!" ,
+                                  description = "Der Kanal konnte nicht gefunden werden!")
+            embed.set_author(name = ctx.author , icon_url = ctx.author.avatar.url)
+            embed.set_footer(text = "User-ID: {}".format(ctx.author.id) , icon_url = ctx.author.avatar.url)
+            await asyncio.sleep(2)
+            await ctx.message.delete()
+            return await ctx.send(embed = embed , delete_after = 4)
+        elif isinstance(error, commands.BadUnionArgument):
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random() ,
+                                  title = "Fehler aufgetreten!" ,
+                                  description = "Der Kanal konnte nicht gefunden werden!")
+            embed.set_author(name = ctx.author , icon_url = ctx.author.avatar.url)
+            embed.set_footer(text = "User-ID: {}".format(ctx.author.id) , icon_url = ctx.author.avatar.url)
+            await asyncio.sleep(2)
+            await ctx.message.delete()
+            return await ctx.send(embed = embed , delete_after = 4)
+        else:
+            raise error
 
     @commands.command(aliases = ['q'])
     async def quote(self, ctx, message: discord.Message):
