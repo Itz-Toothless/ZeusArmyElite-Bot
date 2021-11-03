@@ -28,11 +28,13 @@ class botinfos(commands.Cog):
         em.add_field(name = "Andere Informationen <:info:897290082959118406>:" , value = f'Kernel: {platform.system()} ' f' {platform.release()} \n', inline = True)
         em.add_field(name = "Uptime ⏲:" , value = f"{str(timedelta(seconds = int(round(time.time() - startTime))))}", inline = True)
         em.add_field(name = "Bot ID <:info:897290082959118406>:", value = f"{self.zeus.user.id}", inline = True)
+        em.add_field(name="Invite 📬:", value = f"[Admin Invite](https://discord.com/api/oauth2/authorize?client_id=901585159848095765&permissions=8&scope=bot)\n[Invite](https://discord.com/api/oauth2/authorize?client_id=901585159848095765&permissions=395673173238&scope=bot)")
         em.set_thumbnail(url = f"{self.zeus.user.avatar.url}")
         em.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.author.avatar.url}")
         return await ctx.reply(embed = em , mention_author = False)
 
     @commands.command(aliases = ['p', 'latency', 'bot-latency'])
+    @commands.guild_only()
     async def ping(self , ctx):
         message = await ctx.send(f"**Ping :satellite:**...")
         await asyncio.sleep(1)
