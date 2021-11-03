@@ -14,8 +14,9 @@ class message_logs(commands.Cog):
             d1 = message.created_at
             embed = discord.Embed(title = "Nachrichten-Log" ,
                                   description = f"**Nachricht:**\n{message.content}" , color = 0xFF0000)
-            embed.add_field(name = f"Gelöscht am:" , value = "**<t:{}:{}>**".format(int(d1.timestamp()) , 'F') ,
+            embed.add_field(name = "Gelöscht am:" , value = "**<t:{}:{}>**".format(int(d1.timestamp()) , 'F') ,
                             inline = False)
+            embed.add_field(name="User-ID:", value = f"{message.author.id}", inline = False)
             embed.set_author(name = f"{message.author}", icon_url = f'{message.author.avatar.url}')
             embed.set_footer(text = f"Message-ID: {message.id}" , icon_url = f"{message.author.avatar.url}")
             embed.set_thumbnail(url = f"{message.author.avatar.url}")
@@ -35,7 +36,8 @@ class message_logs(commands.Cog):
                                   color = 0xFF0000)
             embed.add_field(name = f"Geändert am:" , value = "**<t:{}:{}>**".format(int(d1.timestamp()) , 'F') ,
                             inline = False)
-            embed.add_field(name = f"Nachrichten-Link:" , value = f"[Link zur Nachricht]({message_after.jump_url})")
+            embed.add_field(name = f"Nachrichten-Link:" , value = f"[Link zur Nachricht]({message_after.jump_url})", inline = False)
+            embed.add_field(name = "User-ID:" , value = f"{message.author.id}" , inline = False)
             embed.set_author(name = f"{message_after.author}" , icon_url = f'{message_after.author.avatar.url}')
             embed.set_footer(text = f"Message-ID: {message_before.id}" ,
                              icon_url = f"{message_after.author.avatar.url}")
@@ -44,23 +46,54 @@ class message_logs(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        d1 = member.created_at
-        d2 = member.joined_at
-        embed = discord.Embed(color = discord.Colour.random() ,
-                              title = f"{member} ist {member.guild.name} beigetreten")
-        embed.add_field(name = "Beigetreten am:" , value = "**<t:{}:{}>**".format(int(d2.timestamp()) , 'F') ,
-                        inline = False)
-        embed.add_field(name = "Erstellt am:" , value = "**<t:{}:{}>**".format(int(d1.timestamp()) , 'F') ,
-                        inline = False)
-        embed.set_footer(text = f"User-ID: {member.id}" , icon_url = member.avatar.url)
-        embed.set_thumbnail(url = member.avatar.url)
-        channel = await self.zeus.fetch_channel(904464407298457601)
-        return await channel.send(embed = log_embed)
+        if member.author.bot:
+            return
+        else:
+            d1 = member.created_at
+            d2 = member.joined_at
+            embed = discord.Embed(color = discord.Colour.random() ,
+                                  title = f"{member} ist {member.guild.name} beigetreten")
+            embed.add_field(name = "Beigetreten am:" , value = "**<t:{}:{}>**".format(int(d2.timestamp()) , 'F') ,
+                            inline = False)
+            embed.set_thumbnail(url=member.avatar.url)
+            embed.add_field(name = "Erstellt am:" , value = "**<t:{}:{}>**".format(int(d1.timestamp()) , 'F') ,
+                            inline = False)
+            embed.set_footer(text = f"User-ID: {member.id}" , icon_url = member.avatar.url)
+            embed.set_thumbnail(url = member.avatar.url)
+            channel = await self.zeus.fetch_channel(904464407298457601)
+            return await channel.send(embed = log_embed)
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+        else:
+            send = message.created_at
+            msg = message.content
+            author = message.author
+            profilepicture = message.author.avatar.url
+            author_id = message.author.id
+            guild = message.guild.name
+            guild_id = message.guild.id
+            channel = message.channel.mention
+            url = message.jump_url
+            color = discord.Color.random()
+            embed = discord.Embed(timestamp = send, color = color, title = "Nachricht versendet",
+                                  description=f"**Nachricht:**\n{msg}")
+            embed.set_author(name= "{0.user}".format(self.zeus), icon_url = f"{self.zeus.user.avatar.url}")
+            embed.add_field(name="Autor:", value = f"{author} - {author_id}", inline = False)
+            embed.add_field(name="Server & ID:", value = f"{guild} - {guild_id}", inline = False)
+            embed.add_field(name="URL:", value = f"[Nachrichten-Link]({url})", inline = False)
+            embed.add_field(name="Gesendet am:", value = "**<t:{}:{}>**".format(int(send.timestamp()), "F"), inline = False)
+            embed.add_field(name="Gesendet in:", value = channel, inline = False)
+            embed.set_thumbnail(url=profilepicture)
+            channel = await self.zeus.fetch_channel(904610479584972801)
+            return await channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        if member.bot:
-            pass
+        if member.author.bot:
+            return
         else:
             d1 = member.created_at
             d2 = member.joined_at
@@ -81,11 +114,24 @@ class message_logs(commands.Cog):
         embed = discord.Embed(color = discord.Colour.random(),
                               title = f"Ich wurde zu {guild.name} eingeladen")
         embed.add_field(name="Inhaber:", value = guild.owner, inline = False)
-        embed.add_field(name = "ID:", value = guild.owner_id, inline = False)
+        embed.add_field(name = "Inhaber-ID:", value = guild.owner_id, inline = False)
         embed.add_field(name="Erstellt am:", value = "**<t:{}:{}>**".format(int(created.timestamp()), 'F'), inline = False)
         embed.set_footer(text = f"Server-ID: {guild.id}")
         channel = await self.zeus.fetch_channel(904464360263548999)
         return await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild: discord.Guild):
+        created = guild.created_at
+        embed = discord.Embed(color = discord.Colour.random(),
+                              title = f"Ich bin aus {guild.name} geflogen")
+        embed.add_field(name="Inhaber:", value = guild.owner, inline = False)
+        embed.add_field(name="Inhaber-ID:", value = guild.owner_id, inline = False)
+        embed.add_field(name="Erstellt am:", value = "**t:{}:{}**".format(int(created.timestamp()), 'F'), inline = False)
+        embed.set_footer(text=f"Server-ID: {guild.id}")
+        channel = await self.zeus.fetch_channel(904464360263548999)
+        return await channel.send(embed = embed)
+
 
 def setup(zeus):
     zeus.add_cog(message_logs(zeus))
