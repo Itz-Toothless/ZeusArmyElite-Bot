@@ -15,6 +15,7 @@ class dev(commands.Cog):
         self.zeus = zeus
 
     @commands.command(aliases = ["exec"])
+    @commands.guild_only()
     @commands.is_owner()
     async def run(self , ctx , * , input_user):
         byte_data = subprocess.check_output([input_user] , shell = True)
@@ -36,6 +37,7 @@ class dev(commands.Cog):
             raise error
 
     @commands.command(aliases = ['execute'])
+    @commands.guild_only()
     @commands.is_owner()
     async def eval(self , ctx , * , code):
         str_obj = io.StringIO()
@@ -81,6 +83,7 @@ class dev(commands.Cog):
             raise error
 
     @commands.command(aliases = ['s' , 'botsay'])
+    @commands.guild_only()
     @commands.is_owner()
     async def say(self , ctx , * , args):
         await ctx.send(args)
@@ -96,6 +99,7 @@ class dev(commands.Cog):
             raise error
 
     @commands.command(aliases = ["reload" , "update"])
+    @commands.guild_only()
     @commands.is_owner()
     async def load(self , ctx):
         await ctx.message.delete()
