@@ -44,8 +44,7 @@ initial_extensions = [
     'zeus.mod',
     'zeus.infos',
     'zeus.devcmds',
-    'zeus.botinfos',
-    'zeus.logs'
+    'zeus.botinfos'
 ]
 
 
