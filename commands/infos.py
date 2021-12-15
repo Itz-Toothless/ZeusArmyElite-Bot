@@ -1,4 +1,6 @@
 import datetime
+import io
+import aiohttp
 import asyncio
 from datetime import datetime
 from typing import Union
@@ -13,40 +15,122 @@ class infos(commands.Cog):
     @commands.command(aliases = ["serveri" , "server-info" , "si" , "server info"])
     @commands.guild_only()
     async def serverinfo(self , ctx):
+        online_counter = 0
+        idle_counter = 0
+        dnd_counter = 0
+        offline_counter = 0
         server_name = str(ctx.guild.name)
-        server_owner = str(ctx.guild.owner)
-        verification_lvl = str(ctx.guild.verification_level)
+        mfa = "<:Ja_Yes:896789260248686695>" if ctx.guild.mfa_level != 0 else "<:No:896789214581117020>"
+        server_owner = ctx.guild.owner
+        server_owner_id = ctx.guild.owner.id
+        verification_lvl = "Kein Verifizierungslevel" if ctx.guild.verification_level == 'none' else "Niedriges Verifizierungslevel" if ctx.guild.verification_level == "low" else "Mittleres Verifizierungslevel" if ctx.guild.verification_level == "medium" else "Hohes Verifizierungslevel" if ctx.guild.verification_level.name == "high" else "Höchstes Verifizierungslevel"
         description = str(ctx.guild.description)
         id = str(ctx.guild.id)
-        region = str(ctx.guild.region)
+        d1 = ctx.guild.created_at
+        creation = "<t:{}:{}>".format(int(d1.timestamp()) , 'F')
+        region = "Europa" if ctx.guild.region.name == 'europe' else "Brasilien" if ctx.guild.region.name == 'brazil' else "Hongkong" if ctx.guild.region.name == 'hongkong' else "Indien" if ctx.guild.region.name == 'india' else 'Japan' if ctx.guild.region.name == "japan" else 'Singapur' if ctx.guild.region.name == "singapore" else 'Südafrika' if ctx.guild.region.name == "southafrica" else 'Sydney' if ctx.guild.region.name else 'Nordamerika'
         text_ch = str(len(ctx.guild.text_channels))
         voice_ch = str(len(ctx.guild.voice_channels))
-        icon = str(ctx.guild.icon.url)
+        member_count = str(len(ctx.guild.members))
         role_count = len(ctx.guild.roles)
         rules = None if not ctx.guild.rules_channel else str(ctx.guild.rules_channel.name)
         roles = ', '.join([str(r.mention) for r in ctx.guild.roles[:0:-1]])
-        d1 = ctx.guild.created_at
         level = verification_lvl.capitalize()
         region = region.capitalize()
+        for i in ctx.guild.members:
+            if i.status == discord.Status.online:
+                online_counter += 1
+            if i.status == discord.Status.idle:
+                idle_counter += 1
+            if i.status == discord.Status.dnd:
+                dnd_counter += 1
+            if i.status == discord.Status.offline:
+                offline_counter += 1
+        try:
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random() ,
+                                  title = "Server-Info",
+                                  description = f"**Server-Name:**\n{server_name}\n\n**Server erstellt am:**\n{creation}\n\n**Server-Inhaber:**\n{server_owner} - {server_owner_id}\n\n**Server-ID:**\n{id}\n\n**Server-Beschreibung:**\n{description}\n\n**Mitglieder-Anzahl:**\n{member_count}\n\n**Status-Zähler:**\n🟢: [{online_counter}] / 🟡: [{idle_counter}] / 🔴: [{dnd_counter}] / ⚫: [{offline_counter}]\n\n**Verifikations-Level:**\n{verification_lvl}\n\n**Zwei-Faktor Aktiv?**\n{mfa}\n\n**Region:**\n{region}\n\n**Regeln-Kanal:**\n{rules}\n\n**Server-TextKanäle:**\n{text_ch}\n\n**Server-SprachKanäle:**\n{voice_ch}\n\n**Rollen [{role_count}]:**\n{roles}")
+            embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.display_avatar}")
+            embed.set_thumbnail(url = ctx.guild.icon)
+            return await ctx.reply(embed = embed)
+        except discord.HTTPException:
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random() ,
+                                  title = "Server-Info" ,
+                                  description = f"**Server-Name:**\n{server_name}\n\n**Server erstellt am:**\n{creation}\n\n**Server-Inhaber:**\n{server_owner} - {server_owner_id}\n\n**Server-ID:**\n{id}\n\n**Server-Beschreibung:**\n{description}\n\n**Mitglieder-Anzahl:**\n{member_count}\n\n**Status-Zähler:**\n🟢: [{online_counter}] / 🟡: [{idle_counter}] / 🔴: [{dnd_counter}] / ⚫: [{offline_counter}]\n\n**Verifikations-Level:**\n{verification_lvl}\n\n**Zwei-Faktor Aktiv?**\n{mfa}\n\n**Region:**\n{region}\n\n**Regeln-Kanal:**\n{rules}\n\n**Server-TextKanäle:**\n{text_ch}\n\n**Server-SprachKanäle:**\n{voice_ch}\n\n**Rollen [{role_count}]:**\nZu viele Rollen, um diese anzuzeigen!")
+            embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.display_avatar}")
+            embed.set_thumbnail(url = ctx.author.display_avatar)
+            return await ctx.reply(embed = embed)
 
-        embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Colour.random() ,
-                              title = "Server-Info")
-        embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.avatar.url}")
-        embed.add_field(name = "Server-Name" , value = f"{server_name}" , inline = False)
-        embed.add_field(name = "Server erstellt am:" , value = "<t:{}:{}>".format(int(d1.timestamp()) , 'F') ,
-                        inline = False)
-        embed.add_field(name = "Server-Owner" , value = f"{server_owner}" , inline = False)
-        embed.add_field(name = "Server-ID" , value = f"{id}" , inline = False)
-        embed.add_field(name = "Server-Beschreibung" , value = f"{description}" , inline = False)
-        embed.add_field(name = "Verifikations-Level" , value = f"{level}" , inline = False)
-        embed.add_field(name = "Region" , value = f"{region}" , inline = False)
-        embed.add_field(name = "Regeln-Kanal" , value = f"{rules}" , inline = False)
-        embed.add_field(name = "Server-Textkanäle" , value = f"{text_ch}" , inline = False)
-        embed.add_field(name = "Server-Sprachkanäle" , value = f"{voice_ch}" , inline = False)
-        embed.add_field(name = f"Rollen [{role_count}]" , value = f"{roles}" , inline = False)
-        embed.set_thumbnail(url = icon)
-        return await ctx.reply(embed = embed)
+    @commands.command(aliases = ["m-uinfo" , "mass-user" , "mass-userinfo"])
+    @commands.guild_only()
+    async def massuserinfo(self , ctx , targets: commands.Greedy[discord.User]):
+        for x in targets:
+            try:
+                d1 = x.created_at
+                url = x.display_avatar
+                embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 ,
+                                      title = f"Informationen über {x}" ,
+                                      description = f"{x.mention}")
+                embed.set_author(name = f"{x}" , icon_url = f"{url}")
+                embed.set_thumbnail(url = f"{url}")
+                embed.add_field(name = ":credit_card: Discord beigetreten am:" ,
+                                value = "**<t:{}:{}>**".format(int(d1.timestamp()) , "F") , inline = False)
+                if x.bot:
+                    embed.add_field(name = "Bot?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
+                else:
+                    embed.add_field(name = "Bot?" , value = "<:No:896789214581117020>" , inline = True)
+                    embed.add_field(name = "💳 ID: " , value = f"**{x.id}**" , inline = False)
+                    embed.set_footer(text = f"Autor-ID: {ctx.author.id}")
+                    await ctx.send(embed = embed)
+            except Exception as e:
+                print(e)
+                voice_state = "Keine Sprach-Kanal Aktivität erkannt" if not ctx.author.voice else ctx.author.voice.channel
+                d1 = ctx.author.created_at
+                d2 = ctx.author.joined_at
+                presence = str(ctx.author.status).capitalize()
+                timestamp = ctx.message.created_at
+                server_timestamp = "**<t:{}:{}>**".format(int(d2.timestamp()) , "F")
+                embed_color = 0xff2200
+                discord_timestamp = "**<t:{}:{}>**".format(int(d1.timestamp()) , "F")
+                roles = "Keine Rollen erkannt" if not ctx.author.roles[:0:-1] else ', '.join(
+                    r.mention for r in ctx.author.roles[:0:-1])
+                url = ctx.author.display_avatar
+                embed = discord.Embed(timestamp = timestamp , color = embed_color ,
+                                      title = f"Informationen über " + str(ctx.author))
+                embed.set_author(name = str(ctx.author) , icon_url = url)
+                embed.set_thumbnail(url = url)
+                embed.add_field(name = ":credit_card: Discord beigetreten am:" ,
+                                value = discord_timestamp , inline = True)
+                embed.add_field(name = ":credit_card: Server beigetreten am:" ,
+                                value = server_timestamp , inline = True)
+                embed.add_field(name = 'Nick' , value = ctx.author.nick , inline = True)
+                embed.add_field(name = 'Präsenz' , value = presence , inline = True)
+                embed.add_field(name = 'Sprachkanal Aktivität' , value = voice_state , inline = True)
+                if ctx.author.guild_permissions.administrator:
+                    embed.add_field(name = "Admin?" , value = "<:Ja_Yes:896789260248686695>" , inline = False)
+                else:
+                    embed.add_field(name = "Admin?" , value = "<:No:896789214581117020>" , inline = False)
+                if ctx.author.bot:
+                    embed.add_field(name = "Bot?" , value = "<:Ja_Yes:896789260248686695>" , inline = True)
+                else:
+                    embed.add_field(name = "Bot?" , value = "<:No:896789214581117020>" , inline = True)
+                embed.add_field(name = "Rollen: [{}]".format(len(ctx.author.roles) - 1) , value = roles ,
+                                inline = False)
+                perm_string = ', '.join(
+                    [str(p[0]).replace("_" , " ").title() for p in ctx.author.guild_permissions if p[1]])
+                embed.add_field(name = "<:Cmd:896789400250363934> Server Berechtigungen:" , value = perm_string ,
+                                inline = False)
+                embed.set_footer(text = '💳 ID: ' + str(ctx.author.id))
+                await ctx.send(embed = embed)
 
+
+    @massuserinfo.error
+    async def on_command_error(self , ctx , error):
+        if isinstance(error , commands.BadUnionArgument):
+            raise error
+        else:
+            raise error
+    
     @commands.command(aliases = ["user" , "user-info" , "user_info" , "uinfo" , "u-info" , "info", "minfo", "memberinfo", "member-info", "member_info"])
     @commands.guild_only()
     async def userinfo(self , ctx , * , user: Union[discord.Member, discord.User] = None):
@@ -54,10 +138,10 @@ class infos(commands.Cog):
             voice_state = "Keine Sprach-Kanal Aktivität erkannt" if not ctx.author.voice else ctx.author.voice.channel
             d1 = ctx.author.created_at
             d2 = ctx.author.joined_at
-            presence = str(ctx.author.status).capitalize()
             timestamp = ctx.message.created_at
             server_timestamp = "**<t:{}:{}>**".format(int(d2.timestamp()) , "F")
             embed_color = 0xff2200
+            status = "<:status_online:906562454413262888>" if ctx.author.status == 'online' else "<:status_idle:906562420976254976>" if ctx.author.status == 'idle' else "<:status_dnd:906562391129591888>" if ctx.author.status == 'dnd' else "<:status_offline:906562331461423144>" if ctx.author.status == 'offline' else '<:status_streaming:913394334387273759>' if ctx.author.status == "streaming" else "❓"
             discord_timestamp = "**<t:{}:{}>**".format(int(d1.timestamp()) , "F")
             roles = "Keine Rollen erkannt" if not ctx.author.roles[:0:-1] else ', '.join(
                 r.mention for r in ctx.author.roles[:0:-1])
@@ -74,7 +158,7 @@ class infos(commands.Cog):
             embed.add_field(name = ":credit_card: Server beigetreten am:" ,
                             value = server_timestamp , inline = True)
             embed.add_field(name = 'Nick' , value = ctx.author.nick , inline = True)
-            embed.add_field(name = 'Präsenz' , value = presence , inline = True)
+            embed.add_field(name = 'Präsenz' , value = status , inline = True)
             embed.add_field(name = 'Sprachkanal Aktivität' , value = voice_state , inline = True)
             if ctx.author.guild_permissions.administrator:
                 embed.add_field(name = "Admin?" , value = "<:Ja_Yes:896789260248686695>" , inline = False)
@@ -231,8 +315,15 @@ class infos(commands.Cog):
                             inline = False)
             embed.set_footer(text = '💳 ID: ' + str(ctx.author.id))
             return await ctx.send(embed = embed)
+        elif isinstance(error, commands.BadUnionArgument):
+            embed = discord.Embed(color = discord.Colour.random(), title = "Fehler!",
+                                  description = "Bitte gebe einen Nutzer an!\n\nzae!userinfo <user / id>")
+            embed.set_footer(text = f"User-ID: {ctx.author.id}", icon_url = f"{ctx.message.author.avatar.url}")
+            embed.set_author(name = f"{ctx.author}", icon_url = f"{ctx.author.avatar.url}")
+            return await ctx.send(embed=embed)
         else:
             raise error
+
 
     @commands.command(aliases=["perm_string", "perms", "permissions"])
     @commands.guild_only()
@@ -263,6 +354,7 @@ class infos(commands.Cog):
         embed.add_field(name="Rollen Ping:", value=f"{role_mention}", inline = False)
         embed.add_field(name="Rollen Name:", value = f"{role_name}", inline = False)
         embed.add_field(name="Rollen ID:", value = f"{role_id}", inline = False)
+        embed.add_field(name="Rollen Hex-Code:", value = role_color, inline = False)
         embed.add_field(name="Gruppiert?:", value=f"{role_hoist}", inline = False)
         embed.add_field(name="Pingbar für andere Nutzer?:", value=f"{role_mentionable}", inline = False)
         embed.add_field(name="Verwaltet von einem Bot?:", value = f"{role_botmanaged}", inline = False)
@@ -272,7 +364,7 @@ class infos(commands.Cog):
     @roleinfo.error
     async def role_not_found(self, ctx, error):
         if isinstance(error, commands.CommandInvokeError):
-            return await ctx.reply("Bitte erwähne eine Rolle oder benutze eine Rollen-ID, um Infos über diese zu erhalten!")
+            return await ctx.reply("Diese Rolle konnte nicht gefunden werden! Wahrscheinlich liegt es an bestimmten Berechtigungen!")
         elif isinstance(error, commands.RoleNotFound):
             return await ctx.reply("Diese Rolle existiert auf diesem Server nicht!")
 
@@ -436,7 +528,6 @@ class infos(commands.Cog):
             return await ctx.reply(f"{ctx.author} die Nachricht wurde nicht gefunden, womöglich existiert diese nicht mehr!")
         else:
             raise error
-
 
 def setup(zeus):
     zeus.add_cog(infos(zeus))
