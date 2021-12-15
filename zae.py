@@ -1,28 +1,29 @@
 import asyncio
-import locale
 import sys
 import time
 import traceback
 import os
-
+import datetime
+from datetime import datetime
 import discord
 from discord.ext import commands
 
 intents = discord.Intents().all()
 
-zeus = commands.Bot(command_prefix = {"<@901585159848095765>" , "<@!901585159848095765>" , "zae!", "zAe!", "ZaE!", "ZAE!", "Zae!", "zAE!"}, case_insensitive = True , intents = intents)
+zeus = commands.Bot(
+    command_prefix = {"<@901585159848095765>" , "<@!901585159848095765>" , "zae!" , "zAe!" , "ZaE!" , "ZAE!" , "Zae!" ,
+                      "zAE!"} , case_insensitive = True , intents = intents)
 
 zeus.remove_command("help")
 
 startTime = time.time()
-
-locale.setlocale(locale.LC_ALL , 'de_DE.UTF-8')
 
 
 @zeus.event
 async def statuschange():
     await zeus.wait_until_ready()
     while True:
+        servers = len(zeus.guilds)
         members = 0
         for guild in zeus.guilds:
             members += guild.member_count - 1
@@ -39,10 +40,18 @@ async def statuschange():
             activity = discord.Activity(type = discord.ActivityType.listening , name = "Musik mit Zeus"))
         await asyncio.sleep(60)
 
+        await zeus.change_presence(
+            activity = discord.Activity(type = discord.ActivityType.competing, name = f"{servers} Servern mit {members} Usern")
+        )
+        await asyncio.sleep(60)
+
+
 initial_extensions = [
     'zeus.mod',
+    'zeus.music',
     'zeus.infos',
     'zeus.devcmds',
+    'zeus.error-handler',
     'zeus.botinfos',
     'zeus.help-cmd'
 ]
