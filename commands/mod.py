@@ -5,7 +5,6 @@ from typing import Union
 import time
 import datetime
 from datetime import timedelta , datetime
-from static import *
 
 
 class mod(commands.Cog):
@@ -25,8 +24,8 @@ class mod(commands.Cog):
             embed = discord.Embed(timestamp = ctx.message.created_at , color = discord.Color.random() ,
                                   title = "Entbannung ausgeführt" ,
                                   description = f"User: {user}\nModerator: {ctx.author}\nGrund: {reason}")
-            embed.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.message.author.avatar.url}")
-            embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.message.author.avatar.url}")
+            embed.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.message.author.display_avatar}")
+            embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.message.author.display_avatar}")
             return await ctx.reply(embed = embed , mention_author = True)
 
     @unban.error
@@ -51,30 +50,30 @@ class mod(commands.Cog):
         if user is None:
             em = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 , title = "Argumente Fehlen" ,
                                description = f'{ctx.author.mention} Bitte nenne einen User den du Bannen möchtest.\n\nNutzung: `zae!ban <@Nutzer / ID> [Grund]`\n\n\n**`Hinweis: <> makierte Argumente sind notwendig, [] makierte Argumente sind optional`**')
-            em.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.author.avatar.url}")
-            em.set_author(name = f'{ctx.author}' , icon_url = f'{ctx.author.avatar.url}')
+            em.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.author.display_avatar}")
+            em.set_author(name = f'{ctx.author}' , icon_url = f'{ctx.author.display_avatar}')
             return await ctx.reply(embed = em , mention_author = True)
         elif isinstance(user , discord.Member):
             if member.top_role.position < ctx.author.top_role.position:
-                await ctx.guild.ban(user , reason = f"{reason}.")
+                await ctx.guild.ban(user , reason = f"{reason}")
                 embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 ,
                                       title = ":hammer: Nutzer gebannt" ,
                                       description = f"**Gebannter Nutzer: {user}**\n**Moderator: {ctx.author}**\n**Grund: {reason}**")
-                embed.set_footer(text = f"User-ID: {user.id}" , icon_url = f"{ctx.author.avatar.url}")
-                embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.avatar.url}")
+                embed.set_footer(text = f"User-ID: {user.id}" , icon_url = f"{ctx.author.display_avatar}")
+                embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.display_avatar}")
                 return await ctx.reply(embed = embed , mention_author = True)
             else:
                 embed = discord.Embed(timestamp = ctx.message.created_at , title = "Fehler aufgetreten" ,
                                       description = f"Du kannst diesen Nutzer nicht bannen, weil du laut der Rollen Hierachie zu niedrig bist")
-                embed.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.author.avatar.url}")
-                embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.avatar.url}")
+                embed.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.author.display_avatar}")
+                embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.display_avatar}")
                 return await ctx.reply(embed = embed , mention_author = True)
         elif isinstance(user , discord.User):
             await ctx.guild.ban(user , reason = f"{reason}")
             embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 , title = "🔨 Nutzer gebannt" ,
                                   description = f"**Gebannter Nutzer:** {user}\n**Moderator:** {ctx.author}\n**Grund: {reason}**")
-            embed.set_footer(text = f"User-ID: {user.id}" , icon_url = f"{ctx.author.avatar.url}")
-            embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.avatar.url}")
+            embed.set_footer(text = f"User-ID: {user.id}" , icon_url = f"{ctx.author.display_avatar}")
+            embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.display_avatar}")
             return await ctx.reply(embed = embed , mention_author = True)
 
     @ban.error
@@ -94,8 +93,8 @@ class mod(commands.Cog):
         elif isinstance(error , commands.CommandInvokeError):
             embed = discord.Embed(timestamp = ctx.message.created_at , title = "Fehler aufgetreten" ,
                                   description = "Der Fehler ist aus mehreren möglichen Gründen entstanden!\n\nDu bist zu niedrig von der Rollen-Hierarchie, um dies zu tun\n\nDer Nutzer, den du bannen wolltest ist bereits gebannt\n\nIch habe keine Berechtigung, um dies zu tun\n\nDu hast keine Berechtigung, um dies zu tun")
-            embed.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.author.avatar.url}")
-            embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.avatar.url}")
+            embed.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.author.display_avatar}")
+            embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.author.display_avatar}")
             return await ctx.reply(embed = embed , mention_author = True)
         else:
             raise error
@@ -137,20 +136,20 @@ class mod(commands.Cog):
     @commands.bot_has_guild_permissions(kick_members = True)
     @commands.guild_only()
     async def kick(self , ctx , member: discord.Member = None , * , reason='Kein Grund angegeben'):
-        if member is None:
-            em = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 , title = "Argumente Fehlen" ,
-                               description = f'{ctx.author.mention} Bitte nenne einen User den du Kicken möchtest.\n\n`zae!kick (@nutzer / id) [(optional) Grund]`')
-            em.set_author(name = f'{ctx.author}' , icon_url = f'{ctx.message.author.avatar.url}')
-            return await ctx.reply(embed = em , mention_author = True)
-        else:
-            await ctx.guild.kick(member , reason = reason)
-            embe = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 , title = "Kick ausgeführt!")
-            embed.add_field(name = "Betroffener Nutzer:" , value = f"{member}\n**ID:**\n{member.id}" , inline = True)
-            embed.add_field(name = "Moderator:" , value = f"{ctx.author}\n**ID:**\n{ctx.author.id}" , inline = True)
-            embed.add_field(name = "Grund:" , value = str(reason) , inline = True)
-            embe.set_author(name = f'{ctx.author}' , icon_url = f'{ctx.message.author.avatar.url}')
-            embe.set_footer(text = 'User-ID: ' + str(member.id) , icon_url = f"{ctx.message.author.avatar.url}")
-            return await ctx.reply(embed = embe , mention_author = False)
+        	if member is None:
+                em = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 , title = "Argumente Fehlen" ,
+                                   description = f'{ctx.author.mention} Bitte nenne einen User den du Kicken möchtest.\n\n`zae!kick (@nutzer / id) [(optional) Grund]`')
+                em.set_author(name = f'{ctx.author}' , icon_url = f'{ctx.message.author.avatar.url}')
+                return await ctx.reply(embed = em , mention_author = True)
+            else:
+                await ctx.guild.kick(member , reason = reason)
+                embe = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 , title = "Kick ausgeführt!")
+                embed.add_field(name = "Betroffener Nutzer:" , value = f"{member}\n**ID:**\n{member.id}" , inline = True)
+                embed.add_field(name = "Moderator:" , value = f"{ctx.author}\n**ID:**\n{ctx.author.id}" , inline = True)
+                embed.add_field(name = "Grund:" , value = str(reason) , inline = True)
+                embe.set_author(name = f'{ctx.author}' , icon_url = f'{ctx.message.author.avatar.url}')
+                embe.set_footer(text = 'User-ID: ' + str(member.id) , icon_url = f"{ctx.message.author.avatar.url}")
+                return await ctx.reply(embed = embe , mention_author = False)
 
     @kick.error
     async def kick_error(self , ctx , error):
@@ -176,9 +175,9 @@ class mod(commands.Cog):
     @commands.bot_has_guild_permissions(manage_channels = True)
     async def lockdown(self , ctx , channel: discord.TextChannel = None):
         if channel is not None:
-            await ctx.channel.set_permissions(ctx.guild.default_role , send_messages = False)
-            embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 , title = "Kanal entsperrt" ,
-                                  description = f"Der Kanal {ctx.channel.mention} wurde von {ctx.author} gesperrt!")
+            await channel.set_permissions(ctx.guild.default_role, send_messages = False)
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 , title = "Kanal gesperrt" ,
+                                  description = f"Der Kanal {channel.mention} wurde von {ctx.author} gesperrt!")
             embed.set_author(name = f'{ctx.author}' , icon_url = f'{ctx.message.author.avatar.url}')
             return await ctx.reply(embed = embed , mention_author = False)
         else:
@@ -197,7 +196,7 @@ class mod(commands.Cog):
         elif isinstance(error , commands.CommandInvokeError):
             return await ctx.send(f"{ctx.author} der Kanal konnte auf diesem Server nicht gefunden werden!")
         else:
-            pass
+            raise error
 
     @commands.command(aliases = ['unlock'])
     @commands.guild_only()
@@ -205,13 +204,12 @@ class mod(commands.Cog):
     @commands.bot_has_guild_permissions(manage_channels = True)
     async def lockup(self , ctx , channel: discord.TextChannel = None):
         if channel is not None:
-            await ctx.channel.set_permissions(ctx.guild.default_role , send_messages = True)
-            embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 , title = "Kanal entsperrt" ,
-                                  description = f"Der Kanal {ctx.channel.mention} wurde von {ctx.author} entsperrt!")
-            embed.set_author(name = f'{ctx.author.name}#{ctx.author.discriminator}' ,
-                             icon_url = f'{ctx.message.author.avatar.url}')
-            embed.set_footer(text = f"User-ID: {ctx.author.id}")
-            return await ctx.send(embed = embed)
+            await channel.set_permissions(ctx.guild.default_role , send_messages = True)
+            embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 ,
+                                  title = "Kanal entsperrt" ,
+                                  description = f"Der Kanal {channel.mention} wurde von {ctx.author} entsperrt!")
+            embed.set_author(name = f'{ctx.author}' , icon_url = f'{ctx.message.author.avatar.url}')
+            return await ctx.reply(embed = embed , mention_author = False)
         else:
             return await ctx.reply("Du musst schon einen Text-Kanal erwähnen!" , mention_author = True)
 
@@ -735,44 +733,6 @@ class mod(commands.Cog):
             return await ctx.send(f"{ctx.author.mention} Berechtigungs-Fehler! [Gebrauchte Berechtigung: manage_messages]")
         else:
             raise error
-
-    @commands.command(aliases = ["multiban" , "mass-ban" , "multi-ban"])
-    @commands.bot_has_permissions(ban_members = True)
-    @commands.has_guild_permissions(ban_members = True)
-    async def massban(self , ctx , targets: commands.Greedy[discord.User] , * , grund="Kein Grund angegeben"):
-        banlist = await ctx.guild.bans()
-        banned = 0
-        days = 0
-        tries = 0
-        failed = 0
-        for x in targets:
-            tries += 1
-            if x in banlist:
-                failed += 1
-                banned -= 1
-            else:
-                try:
-                    await ctx.guild.ban(x , reason = f"{grund}" , delete_message_days = days)
-                    banned += 1
-                except Exception:
-                    failed += 1
-        embed = discord.Embed(timestamp = ctx.message.created_at , color = 0xff2200 ,
-                              title = "Massban ausgeführt :tools:" ,
-                              description = f"Es wurde versucht, **{tries}** Personen zu bannen. Ergebnisse: \n**{banned}** Nutzer wurde/n gebannt. \n**{failed}** Nutzer konnte/n nicht gebannt werden.")
-        embed.set_footer(text = f"User-ID: {ctx.author.id}" , icon_url = f"{ctx.message.author.avatar.url}")
-        embed.set_author(name = f"{ctx.author}" , icon_url = f"{ctx.message.author.avatar.url}")
-        return await ctx.reply(embed = embed , mention_author = False)
-
-    @massban.error
-    async def massban_error(self , ctx , error):
-        if isinstance(error , commands.MissingPermissions):
-            await ctx.send(f"{ctx.author.mention} Berechtigungs-Fehler! [Gebrauchte Berechtigung: ban_members]")
-        elif isinstance(error , commands.BotMissingPermissions):
-            await ctx.send(f"{ctx.author.mention} Berechtigungs-Fehler! [Gebrauchte Berechtigung: ban_members]")
-        elif isinstance(error , commands.UserNotFound):
-            pass
-        else:
-            pass
 
 
 def setup(zeus):
