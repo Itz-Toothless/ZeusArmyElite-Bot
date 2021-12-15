@@ -85,8 +85,8 @@ class dev(commands.Cog):
     @commands.command(aliases = ['s' , 'botsay'])
     @commands.guild_only()
     @commands.is_owner()
-    async def say(self , ctx , * , args):
-        await ctx.send(args)
+    async def say(self , ctx , args):
+        await ctx.send(content = args, allowed_mentions = None)
         await ctx.message.delete()
 
     @say.error
